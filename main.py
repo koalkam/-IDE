@@ -11,6 +11,7 @@ INITIAL_WINDOW_HEIGHT = 700
 colors = {'main-bg': '#3c3f41',
           'default-bg': '#2b2b2b', 'default-text': '#a9b7c6',
           'keyword-text': '#cc7832', 'keyword-bg': '#2b2b2b',
+          'decorator-text': '#bbb529', 'decorator-bg': '#2b2b2b',
           'builtin-text': '#8888c6', 'builtin-bg': '#2b2b2b',
           'comment-text': '#808080', 'comment-bg': '#2b2b2b',
           'int-text': '#6294ba', 'int-bg': '#2b2b2b',
@@ -29,6 +30,7 @@ BUILTINS = ['print', 'len', 'range', 'int', 'str', 'bool', 'list', 'set', 'map']
 func_name_next = False
 string_color_mode = False
 comment_color_mode = False
+decorator_color_mode = False
 
 
 # Syntax Highlight class
@@ -38,6 +40,7 @@ class SyntaxHighlighter(CustomLexer):
         self.STYLES = {
             'default': 0,
             'keyword': 1,
+            'decorator': 2,
             'builtin': 3,
             'comment': 4,
             # 'string': 5,
@@ -62,17 +65,17 @@ class SyntaxHighlighter(CustomLexer):
 
 
     def styleText(self, start: int, end: int) -> None:
-        global func_name_next
-        global string_color_mode
-        global comment_color_mode
+        global func_name_next, string_color_mode, comment_color_mode, decorator_color_mode
 
         self.startStyling(start)
 
         text = self.parent().text()[start:end]
 
+
         # tokenizing text using regex
         tokenizer = compile(r'\{\.|\.\}|\#|\'|\"\"\"|\n|\s+|\w+|\W')
         tokens = [(token, len(token)) for token in tokenizer.findall(text)]
+        print(tokens)
 
         # coloring tokens
         for token in tokens:
@@ -80,7 +83,9 @@ class SyntaxHighlighter(CustomLexer):
                 self.setStyling(token[1], 1)
                 if token[0] == 'def':
                     func_name_next = True
-
+            elif '\r\n' in token[0]:
+                comment_color_mode = False
+                decorator_color_mode = False
             elif token[0] in BUILTINS:
                 self.setStyling(token[1], 3)
             elif token[0] == 'self':
@@ -96,8 +101,13 @@ class SyntaxHighlighter(CustomLexer):
             elif token[0] == '#' and string_color_mode == False:
                 comment_color_mode = True
                 self.setStyling(token[1], 4)
-            # elif comment_color_mode:
-            #     self.setStyling(token[1], 4)
+            elif comment_color_mode:
+                 self.setStyling(token[1], 4)
+            elif token[0] == '@' and string_color_mode == False and comment_color_mode == False:
+                decorator_color_mode = True
+                self.setStyling(token[1], 2)
+            elif decorator_color_mode:
+                self.setStyling(token[1], 2)
             else:
                 self.setStyling(token[1], 0)
 
