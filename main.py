@@ -1,3 +1,4 @@
+# INVITATION LINK https://code-with-me.global.jetbrains.com/yKKoG8AH_Zzk5KyYzhSMyw#p=PC&fp=36D53BD613CDAF8EA56658E53753621251293754B692B4511DDA89B055412FBD
 from re import compile
 from sys import exit
 
